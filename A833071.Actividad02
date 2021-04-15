@@ -1,0 +1,166 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+
+
+namespace A833071.Actividad02
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            bool ingresaDatos = false;
+            bool esNumero;
+            string respuesta;
+
+
+            int valorOperadorIngresado;
+            string numeroOperadorIngresado;
+
+
+            int valorOrdenIngresado;
+            string numeroOrdenIngresado;
+
+
+            Queue<int> colaDeOperadores = new Queue<int>();
+            Queue<int> colaDeOrdenes = new Queue<int>();
+            Dictionary<int, int> OrdenesDeInstalacion = new Dictionary<int, int>();
+
+            do
+            {​​​​​​​
+                //A) El ingreso de una cantidad de operadores (identificados por un número de operador).
+                do
+                {​​​​​​​
+                    Console.WriteLine("Ingrese un número de operador");
+                    numeroOperadorIngresado = Console.ReadLine();
+                    esNumero = int.TryParse(numeroOperadorIngresado, out valorOperadorIngresado);
+
+
+                    ////Encolar los operadores recibidos 
+                    colaDeOperadores.Enqueue(valorOperadorIngresado);
+                }​​​​​​​
+                while (!esNumero)
+                    //B) El ingreso de una cantidad de órdenes de trabajo(identificadas por un número de órden).
+                    do
+                    {​​​​​​​
+                    Console.WriteLine("Ingrese un número de orden");
+                        numeroOrdenIngresado = Console.ReadLine();
+                        esNumero = int.TryParse(numeroOrdenIngresado, out valorOrdenIngresado);
+
+
+                        //Encolar las órdenes de instalación recibidas 
+                        colaDeOrdenes.Enqueue(valorOrdenIngresado);
+                    }​​​​​​​
+                while (!esNumero) ;
+
+
+                ingresaDatos = true;
+                Console.WriteLine("¿Desea finalizar el ingreso de datos? Presione 'q' para finalizar y cualquier tecla para continuar ...");
+                respuesta = Console.ReadLine();
+                if (respuesta.ToLower().Equals("q")) ingresaDatos = false;
+            }​​​​​​​ while (ingresaDatos) ;
+
+
+
+            Console.WriteLine("\n");
+            Console.WriteLine("-------------------------------------");
+            Console.WriteLine("Operadores cargados: ");
+            Console.WriteLine("-------------------------------------");
+            foreach (int oper in colaDeOperadores)
+                Console.Write("    {​​​​​​​0}​​​​​​​", oper);
+            Console.WriteLine();
+
+
+            Console.WriteLine("\n");
+            Console.WriteLine("-------------------------------------");
+            Console.WriteLine("Ordenes pendientes: ");
+            Console.WriteLine("-------------------------------------");
+            foreach (int ord in colaDeOrdenes)
+                Console.Write("    {​​​​​​​0}​​​​​​​", ord);
+            Console.WriteLine();
+
+
+
+            //C) La asignación de una orden a un operador,el sistema le asignará la próxima orden de trabajo no asignada
+            do
+            {​​​​​​​
+
+
+                Console.WriteLine("\n");
+                Console.WriteLine("-------------------------------------");
+                Console.WriteLine("Asignación de una orden a un operador");
+                Console.WriteLine("-------------------------------------");
+                do
+                {​​​​​​​
+                    Console.WriteLine("Ingrese un número de operador:");
+                    numeroOperadorIngresado = Console.ReadLine();
+                    esNumero = int.TryParse(numeroOperadorIngresado, out valorOperadorIngresado);
+
+
+                }​​​​​​​ while (!esNumero) ;
+
+
+                //Si la cola de ordenes no esta vacia
+                if (colaDeOrdenes.Count > 0)
+                {​​​​​​​
+                    //Devuelve el primer elemento en la cola de ordenes y lo elimina
+                    int ordenAsignada = colaDeOrdenes.Dequeue();
+
+
+                    //asignación de una orden a un operador
+                    if (!OrdenesDeInstalacion.ContainsKey(ordenAsignada))
+                    {​​​​​​​
+                        OrdenesDeInstalacion.Add(ordenAsignada, valorOperadorIngresado);
+                        Console.WriteLine("\n");
+                        Console.WriteLine($"La órden de Instalacion: {​​​​​​​ordenAsignada}​​​​​​​  fue correctamente asignada al operador: {​​​​​​​OrdenesDeInstalacion[ordenAsignada]}​​​​​​​");
+                    }​​​​​​​
+                    else
+                    {​​​​​​​ 
+                        Console.WriteLine($"La orden de instalación: {​​​​​​​ordenAsignada}​​​​​​​ ya se encuentra asignada.");
+                    }​​​​​​​
+                    Console.WriteLine("\n");
+                    Console.Write($"Quedan pendientes: {​​​​​​​colaDeOrdenes.Count}​​​​​​​ - ");
+                    if (colaDeOrdenes.Count > 0)
+                    {​​​​​​​
+                        Console.WriteLine("\n");
+                        Console.Write($"N° Órden siguiente: {​​​​​​​colaDeOrdenes.Peek()}​​​​​​​ ");
+                    }​​​​​​​
+                    Console.WriteLine("\n");
+                }​​​​​​​
+                else
+                {​​​​​​​
+                    Console.WriteLine("\n");
+                    Console.Write("No existen Órdenes de Instalación pendientes de asignar.");
+                }​​​​​​​
+                ingresaDatos = true;
+                Console.WriteLine("¿Desea finalizar la asignación de una órden a un operador? Presione 'q' para finalizar y cualquier tecla para continuar ...");
+                respuesta = Console.ReadLine();
+                if (respuesta.ToLower().Equals("q")) ingresaDatos = false;
+            }​​​​​​​ while (ingresaDatos) ;
+            //D)reporte de cuántas órdenes cumplió cada operador
+
+            var query = from item in OrdenesDeInstalacion
+                        group item by item.Value into g
+                        select new
+                        {​​​​​​​
+                                Operador = g.First().Value,
+                            Cantidad = g.Count()
+                        }​​​​​​​;
+
+
+            foreach (var item in query)
+            {​​​​​​​
+                    Console.WriteLine("\n");
+                Console.WriteLine($"El Operador N° {​​​​​​​item.Operador}​​​​​​​ cumplió: {​​​​​​​item.Cantidad}​​​​​​​ ordenes.");
+            }​​​​​​​
+
+
+            //D)reporte de órdenes  que quedaron pendientes de asignar.
+            Console.WriteLine("\n");
+            Console.Write($"Cantidad de Órdenes que quedaron pendientes de asignar : {​​​​​​​colaDeOrdenes.Count}​​​​​​​ .");
+            Console.ReadKey();
+        }​​​​​​​
+    }​​​​​​​
+}​​​​​​​
+ 
